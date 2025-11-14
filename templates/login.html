@@ -154,7 +154,7 @@
   </div>
 
   <!-- Toast de notificación -->
-  {% if message %}
+  {% if message and message != 'None' %}
   <script>
     function showToast(message, type) {
       const toast = document.createElement('div');

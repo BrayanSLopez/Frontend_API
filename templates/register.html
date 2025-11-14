@@ -148,6 +148,7 @@
   </div>
 
   <!-- Toast de notificación -->
+  {% if message and message != 'None' %}
   <script>
     function showToast(message, type) {
       const toast = document.createElement('div');
@@ -162,15 +163,13 @@
       document.body.appendChild(toast);
     }
     
-    // Verificar si hay mensaje en el template
     const messageElement = "{{ message }}";
-    if (messageElement) {
-      if (messageElement.includes('exitosa') || messageElement.includes('éxito') || messageElement.includes('✓')) {
-        showToast(messageElement, 'success');
-      } else {
-        showToast(messageElement, 'error');
-      }
+    if (messageElement.includes('exitosa') || messageElement.includes('éxito') || messageElement.includes('✓')) {
+      showToast(messageElement, 'success');
+    } else {
+      showToast(messageElement, 'error');
     }
   </script>
+  {% endif %}
 </body>
 </html>

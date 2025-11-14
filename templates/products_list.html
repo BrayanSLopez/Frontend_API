@@ -219,9 +219,8 @@
       document.body.appendChild(toast);
     }
     
-    // Verificar si hay mensaje en el template
     const messageElement = "{{ message }}";
-    if (messageElement && messageElement.trim()) {
+    if (messageElement && messageElement.trim() && messageElement !== 'None') {
       showToast(messageElement, 'success');
     }
   </script>
