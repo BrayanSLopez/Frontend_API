@@ -1,6 +1,8 @@
 # Front_API
 Pequeña aplicación Flask que muestra login/registro y una UI para gestionar productos consumiendo una API remota.
 
+# Esta es la rama development
+
 Requisitos:
 - Python 3.8+
 - Acceso a red para la API remota
