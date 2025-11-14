@@ -1,44 +1,229 @@
 <!doctype html>
 <html lang="es">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<script src="https://cdn.tailwindcss.com"></script>
-<title>Lista de Productos</title>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes toastSlide {
+      0% { opacity: 0; transform: translateX(100%); }
+      10% { opacity: 1; transform: translateX(0); }
+      85% { opacity: 1; transform: translateX(0); }
+      100% { opacity: 0; transform: translateX(100%); }
+    }
+    body {
+      background: radial-gradient(circle at 20% 50%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
+                  linear-gradient(135deg, #0f0a1a 0%, #1a0f2e 100%);
+      min-height: 100vh;
+    }
+    .card-glow {
+      background: rgba(15, 15, 35, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37),
+                  inset 0 0 30px rgba(168, 85, 247, 0.1),
+                  0 0 40px rgba(168, 85, 247, 0.15);
+      animation: slideDown 0.6s ease-out;
+    }
+    .btn-neon {
+      background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      transition: all 0.3s ease;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+    .btn-neon:hover {
+      box-shadow: 0 0 30px rgba(168, 85, 247, 0.8),
+                  0 0 60px rgba(236, 72, 153, 0.6);
+      transform: translateY(-2px);
+    }
+    .btn-secondary {
+      color: rgba(168, 85, 247, 0.8);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      transition: all 0.3s ease;
+    }
+    .btn-secondary:hover {
+      background: rgba(168, 85, 247, 0.1);
+      border-color: rgba(168, 85, 247, 0.6);
+      color: rgba(168, 85, 247, 1);
+    }
+    .glow-text {
+      animation: glow 3s ease-in-out infinite;
+    }
+    .accent-line {
+      background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.5), transparent);
+      height: 1px;
+    }
+    .table-row {
+      border-bottom: 1px solid rgba(168, 85, 247, 0.1);
+      transition: all 0.3s ease;
+    }
+    .table-row:hover {
+      background: rgba(168, 85, 247, 0.05);
+      border-bottom-color: rgba(168, 85, 247, 0.3);
+    }
+    .table-cell {
+      color: rgba(200, 200, 255, 0.9);
+      font-size: 0.875rem;
+      font-weight: 300;
+    }
+    .table-header {
+      background: rgba(168, 85, 247, 0.1);
+      border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+      color: rgba(168, 85, 247, 0.9);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 300;
+    }
+    .action-link {
+      color: rgba(168, 85, 247, 0.8);
+      transition: all 0.3s ease;
+      font-weight: 300;
+    }
+    .action-link:hover {
+      color: rgba(236, 72, 153, 1);
+      text-decoration: underline;
+    }
+    .delete-btn {
+      color: rgba(239, 68, 68, 0.8);
+    }
+    .delete-btn:hover {
+      color: rgba(239, 68, 68, 1);
+      text-decoration: underline;
+    }
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(15, 15, 35, 0.95);
+      padding: 16px 24px;
+      border-radius: 8px;
+      z-index: 1000;
+      animation: toastSlide 5s ease-in-out forwards;
+      box-shadow: 0 0 30px;
+      border: 1px solid;
+      font-weight: 500;
+      min-width: 250px;
+    }
+    .toast.success {
+      border-color: rgba(16, 185, 129, 0.8);
+      color: #10b981;
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+    }
+    .toast.error {
+      border-color: rgba(239, 68, 68, 0.8);
+      color: #ef4444;
+      box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);
+    }
+  </style>
+  <title>Lista de Productos - ProductsPremium</title>
 </head>
-<body class="bg-gray-50 min-h-screen p-6">
-  <div class="max-w-6xl mx-auto">
-    <div class="bg-white shadow rounded-lg p-6 mb-6">
-      <h1 class="text-2xl font-semibold mb-4">Productos</h1>
-      <a href="{{ url_for('productos_new') }}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Crear producto</a>
-      <a href="{{ url_for('productos_ui') }}" class="ml-2 text-sm text-gray-600 hover:underline">Volver</a>
-    </div>
+<body class="p-4 md:p-8">
+  <div class="absolute inset-0 overflow-hidden">
+    <div class="absolute top-0 right-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-5 animate-pulse"></div>
+    <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-5 animate-pulse" style="animation-delay: 2s;"></div>
+  </div>
 
-    <div class="bg-white shadow rounded-lg p-6">
+  <div class="relative z-10 max-w-6xl mx-auto">
+    <div class="card-glow rounded-2xl p-8 md:p-10 mb-6">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h1 class="glow-text text-3xl font-light text-white">Productos</h1>
+          <p class="text-sm text-purple-300 mt-2 font-light">Gestión completa de tu catálogo</p>
+        </div>
+        <div class="flex gap-3">
+          <a href="{{ url_for('productos_new') }}" class="btn-neon px-6 py-2 rounded-lg text-white font-light text-sm">
+            ➕ Nuevo
+          </a>
+          <a href="{{ url_for('productos_ui') }}" class="btn-secondary px-6 py-2 rounded-lg font-light text-sm">
+            ← Volver
+          </a>
+        </div>
+      </div>
+
+      <div class="accent-line mb-8"></div>
+
       {% if productos %}
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead><tr>
-          <th class="px-4 py-2 text-left">ID</th><th class="px-4 py-2 text-left">Nombre</th><th class="px-4 py-2 text-left">Precio</th><th class="px-4 py-2 text-left">Stock</th><th class="px-4 py-2 text-left">Acciones</th>
-        </tr></thead>
-        <tbody>
-          {% for p in productos %}
-          <tr class="border-t">
-            <td class="px-4 py-2">{{ p.get('id') or p.get('id_producto') or loop.index }}</td>
-            <td class="px-4 py-2">{{ p.get('nombre_producto') or p.get('nombre') or '-' }}</td>
-            <td class="px-4 py-2">{{ p.get('precio') or p.get('precio_unitario') or '-' }}</td>
-            <td class="px-4 py-2">{{ p.get('stock') or '-' }}</td>
-            <td class="px-4 py-2">
-              <a href="{{ url_for('productos_view', pid=(p.get('id') or p.get('id_producto') )) }}" class="text-indigo-600 hover:underline">Ver / Editar</a>
-              <form method="post" action="{{ url_for('productos_delete', pid=(p.get('id') or p.get('id_producto'))) }}" style="display:inline-block;margin-left:8px;">
-                <button type="submit" class="text-red-600">Eliminar</button>
-              </form>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+        <div class="overflow-x-auto rounded-lg border border-purple-500 border-opacity-20">
+          <table class="w-full">
+            <thead>
+              <tr class="table-header">
+                <th class="px-6 py-4 text-left">ID</th>
+                <th class="px-6 py-4 text-left">Nombre</th>
+                <th class="px-6 py-4 text-left">Precio</th>
+                <th class="px-6 py-4 text-left">Stock</th>
+                <th class="px-6 py-4 text-left">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in productos %}
+              <tr class="table-row">
+                <td class="table-cell px-6 py-4 whitespace-nowrap">
+                  <span class="text-purple-400">#{{ p.get('id') or p.get('id_producto') or loop.index }}</span>
+                </td>
+                <td class="table-cell px-6 py-4">
+                  {{ p.get('nombre_producto') or p.get('nombre') or '—' }}
+                </td>
+                <td class="table-cell px-6 py-4 whitespace-nowrap">
+                  <span class="text-pink-400">{{ p.get('precio') or p.get('precio_unitario') or '—' }}</span>
+                </td>
+                <td class="table-cell px-6 py-4 whitespace-nowrap">
+                  <span class="px-2 py-1 rounded-full text-xs" 
+                        style="background: rgba(168, 85, 247, 0.2); color: rgba(168, 85, 247, 0.9);">
+                    {{ p.get('stock') or '—' }}
+                  </span>
+                </td>
+                <td class="table-cell px-6 py-4 whitespace-nowrap space-x-4">
+                  <a href="{{ url_for('productos_view', pid=(p.get('id') or p.get('id_producto'))) }}" 
+                     class="action-link">👁 Ver</a>
+                  <form method="post" action="{{ url_for('productos_delete', pid=(p.get('id') or p.get('id_producto'))) }}" 
+                        class="inline" onsubmit="return confirm('¿Eliminar este producto?');">
+                    <button type="submit" class="delete-btn cursor-pointer transition duration-200">
+                      🗑 Eliminar
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       {% else %}
-      <p class="text-sm text-gray-600">No hay productos o error al obtenerlos.</p>
+        <div class="text-center py-16">
+          <div class="text-6xl mb-4">📦</div>
+          <p class="text-gray-400 font-light text-lg">No hay productos disponibles</p>
+          <a href="{{ url_for('productos_new') }}" class="text-purple-400 hover:text-purple-300 transition duration-200 text-sm font-light mt-4 inline-block">
+            Crear el primero
+          </a>
+        </div>
       {% endif %}
     </div>
   </div>
+
+  <script>
+    function showToast(message, type) {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      if (type === 'success') {
+        toast.innerHTML = `✓ ${message}`;
+      } else if (type === 'error') {
+        toast.innerHTML = `✗ ${message}`;
+      }
+      
+      document.body.appendChild(toast);
+    }
+    
+    // Verificar si hay mensaje en el template
+    const messageElement = "{{ message }}";
+    if (messageElement && messageElement.trim()) {
+      showToast(messageElement, 'success');
+    }
+  </script>
 </body>
 </html>

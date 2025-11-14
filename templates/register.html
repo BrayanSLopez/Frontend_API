@@ -1,41 +1,176 @@
 <!doctype html>
 <html lang="es">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<script src="https://cdn.tailwindcss.com"></script>
-<title>Registro</title>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes toastSlide {
+      0% { opacity: 0; transform: translateX(100%); }
+      10% { opacity: 1; transform: translateX(0); }
+      85% { opacity: 1; transform: translateX(0); }
+      100% { opacity: 0; transform: translateX(100%); }
+    }
+    @keyframes glow {
+      0%, 100% { text-shadow: 0 0 10px rgba(168, 85, 247, 0.5), 0 0 20px rgba(236, 72, 153, 0.3); }
+      50% { text-shadow: 0 0 20px rgba(168, 85, 247, 0.8), 0 0 40px rgba(236, 72, 153, 0.6); }
+    }
+    body { 
+      background: radial-gradient(circle at 20% 50%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
+                  linear-gradient(135deg, #0f0a1a 0%, #1a0f2e 100%);
+      min-height: 100vh;
+    }
+    .card-glow {
+      background: rgba(15, 15, 35, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37),
+                  inset 0 0 30px rgba(168, 85, 247, 0.1),
+                  0 0 40px rgba(168, 85, 247, 0.15);
+    }
+    .input-glow {
+      background: rgba(30, 20, 60, 0.5);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      transition: all 0.3s ease;
+    }
+    .input-glow:focus {
+      background: rgba(40, 25, 80, 0.7);
+      border: 1px solid rgba(168, 85, 247, 0.6);
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.4),
+                  inset 0 0 15px rgba(168, 85, 247, 0.1);
+      outline: none;
+    }
+    .btn-neon {
+      background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      transition: all 0.3s ease;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+    .btn-neon:hover {
+      box-shadow: 0 0 30px rgba(168, 85, 247, 0.8),
+                  0 0 60px rgba(236, 72, 153, 0.6);
+      transform: translateY(-2px);
+    }
+    .glow-text {
+      animation: glow 3s ease-in-out infinite;
+    }
+    .accent-line {
+      background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.5), transparent);
+      height: 1px;
+    }
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(15, 15, 35, 0.95);
+      padding: 16px 24px;
+      border-radius: 8px;
+      z-index: 1000;
+      animation: toastSlide 5s ease-in-out forwards;
+      box-shadow: 0 0 30px;
+      border: 1px solid;
+      font-weight: 500;
+      min-width: 250px;
+    }
+    .toast.success {
+      border-color: rgba(16, 185, 129, 0.8);
+      color: #10b981;
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+    }
+    .toast.error {
+      border-color: rgba(239, 68, 68, 0.8);
+      color: #ef4444;
+      box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);
+    }
+  </style>
+  <title>Registro - ProductsPremium</title>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-  <div class="bg-white shadow-md rounded-lg p-8 w-full max-w-md">
-    <h1 class="text-2xl font-semibold text-center mb-6">Registro de Usuario</h1>
-
-    {% if message %}
-      <div class="mb-4 p-3 bg-red-100 text-red-700 rounded">
-        {{ message }}
-      </div>
-    {% endif %}
-
-    <form method="post" action="{{ url_for('do_register') }}" class="space-y-4">
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Nombre completo</label>
-        <input name="full_name" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="Juan Pérez"/>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Usuario</label>
-        <input name="username" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="juan.perez"/>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Contraseña</label>
-        <input name="password" type="password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="••••••••"/>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Email</label>
-        <input name="email" type="email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm" placeholder="juan@ejemplo.com"/>
-      </div>
-      <div class="flex items-center justify-between">
-        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">Registrarse</button>
-        <a href="{{ url_for('index') }}" class="text-sm text-gray-500 hover:underline">Ya tengo cuenta</a>
-      </div>
-    </form>
+<body class="flex items-center justify-center p-4">
+  <div class="absolute inset-0 overflow-hidden">
+    <div class="absolute top-0 right-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-5 animate-pulse"></div>
+    <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-5 animate-pulse" style="animation-delay: 2s;"></div>
   </div>
+  
+  <div class="relative w-full max-w-md z-10">
+      <div class="card-glow rounded-2xl p-8 md:p-10">
+        <div class="text-center mb-2">
+          <h2 class="text-lg font-light text-purple-400 tracking-widest uppercase">ProductsPremium</h2>
+        </div>
+        <h1 class="glow-text text-3xl font-light text-center text-white mb-2">Únete</h1>
+        <p class="text-center text-sm text-purple-300 mb-8">Crea tu cuenta en la plataforma</p>
+        
+        <div class="accent-line mb-8"></div>
+
+        <form method="post" action="{{ url_for('do_register') }}" class="space-y-5">
+          <div>
+            <label class="block text-xs text-purple-300 mb-2 uppercase tracking-wide font-light">Nombre completo</label>
+            <input name="full_name" required 
+                   class="w-full px-4 py-3 rounded-lg input-glow text-white placeholder-purple-400 placeholder-opacity-50 font-light"
+                   placeholder="Juan Pérez"/>
+          </div>
+          
+          <div>
+            <label class="block text-xs text-purple-300 mb-2 uppercase tracking-wide font-light">Usuario</label>
+            <input name="username" required 
+                   class="w-full px-4 py-3 rounded-lg input-glow text-white placeholder-purple-400 placeholder-opacity-50 font-light"
+                   placeholder="juan.perez"/>
+          </div>
+          
+          <div>
+            <label class="block text-xs text-purple-300 mb-2 uppercase tracking-wide font-light">Email</label>
+            <input name="email" type="email" required 
+                   class="w-full px-4 py-3 rounded-lg input-glow text-white placeholder-purple-400 placeholder-opacity-50 font-light"
+                   placeholder="juan@ejemplo.com"/>
+          </div>
+          
+          <div>
+            <label class="block text-xs text-purple-300 mb-2 uppercase tracking-wide font-light">Contraseña</label>
+            <input name="password" type="password" required 
+                   class="w-full px-4 py-3 rounded-lg input-glow text-white placeholder-purple-400 placeholder-opacity-50 font-light"
+                   placeholder="••••••••"/>
+          </div>
+
+          <button type="submit" class="btn-neon w-full py-3 rounded-lg text-white font-light uppercase tracking-wider text-sm mt-6">
+            Registrarse
+          </button>
+        </form>
+
+        <div class="accent-line my-6"></div>
+
+        <p class="text-center text-xs text-gray-500 font-light">
+          ¿Ya tienes cuenta?<br/>
+          <a href="{{ url_for('index') }}" class="text-purple-400 hover:text-purple-300 transition duration-200 font-light">
+            Inicia sesión aquí
+          </a>
+        </p>
+      </div>
+  </div>
+
+  <!-- Toast de notificación -->
+  <script>
+    function showToast(message, type) {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      if (type === 'success') {
+        toast.innerHTML = `✓ ${message}`;
+      } else if (type === 'error') {
+        toast.innerHTML = `✗ ${message}`;
+      }
+      
+      document.body.appendChild(toast);
+    }
+    
+    // Verificar si hay mensaje en el template
+    const messageElement = "{{ message }}";
+    if (messageElement) {
+      if (messageElement.includes('exitosa') || messageElement.includes('éxito') || messageElement.includes('✓')) {
+        showToast(messageElement, 'success');
+      } else {
+        showToast(messageElement, 'error');
+      }
+    }
+  </script>
 </body>
 </html>

@@ -1,32 +1,292 @@
 <!doctype html>
 <html lang="es">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<script src="https://cdn.tailwindcss.com"></script>
-<title>Productos</title>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse-neon {
+      0%, 100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.5), inset 0 0 15px rgba(168, 85, 247, 0.1); }
+      50% { box-shadow: 0 0 40px rgba(168, 85, 247, 0.8), inset 0 0 25px rgba(168, 85, 247, 0.2); }
+    }
+    body {
+      background: radial-gradient(circle at 20% 50%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
+                  linear-gradient(135deg, #0f0a1a 0%, #1a0f2e 100%);
+      min-height: 100vh;
+    }
+    .card-glow {
+      background: rgba(15, 15, 35, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37),
+                  inset 0 0 30px rgba(168, 85, 247, 0.1),
+                  0 0 40px rgba(168, 85, 247, 0.15);
+      animation: slideDown 0.6s ease-out;
+    }
+    .stat-card {
+      background: rgba(168, 85, 247, 0.1);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      animation: slideDown 0.6s ease-out;
+      animation-fill-mode: both;
+      transition: all 0.3s ease;
+    }
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .stat-card:hover {
+      background: rgba(168, 85, 247, 0.15);
+      border-color: rgba(168, 85, 247, 0.6);
+      transform: translateY(-5px);
+      box-shadow: 0 0 30px rgba(168, 85, 247, 0.3);
+    }
+    .btn-neon {
+      background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      transition: all 0.3s ease;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-neon::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s ease;
+    }
+    .btn-neon:hover::before {
+      left: 100%;
+    }
+    .btn-neon:hover {
+      box-shadow: 0 0 30px rgba(168, 85, 247, 0.8),
+                  0 0 60px rgba(236, 72, 153, 0.6);
+      transform: translateY(-2px);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+    }
+    .btn-secondary {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    .btn-tertiary {
+      background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%);
+    }
+    .input-search {
+      background: rgba(30, 20, 60, 0.5);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      transition: all 0.3s ease;
+      color: white;
+    }
+    .input-search:focus {
+      background: rgba(40, 25, 80, 0.7);
+      border: 1px solid rgba(168, 85, 247, 0.6);
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.4),
+                  inset 0 0 15px rgba(168, 85, 247, 0.1);
+      outline: none;
+    }
+    .input-search::placeholder {
+      color: rgba(168, 85, 247, 0.4);
+    }
+    .glow-text {
+      animation: glow 3s ease-in-out infinite;
+    }
+    .float-animation {
+      animation: slideDown 0.6s ease-out;
+    }
+    .accent-line {
+      background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.5), transparent);
+      height: 1px;
+    }
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    .hero-glow {
+      animation: pulse-neon 3s ease-in-out infinite;
+    }
+  </style>
+  <title>Dashboard - ProductsPremium</title>
 </head>
-<body class="bg-gray-50 min-h-screen p-6">
-  <div class="max-w-4xl mx-auto">
-    <div class="bg-white shadow rounded-lg p-6 mb-6">
-      <h1 class="text-2xl font-semibold mb-4">Gestión de Productos</h1>
-      <p class="text-sm text-gray-600 mb-4">Token guardado en servidor: <code>{{ token_present }}</code></p>
+<body class="p-4 md:p-8">
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-0 right-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-5 animate-pulse"></div>
+    <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-5 animate-pulse" style="animation-delay: 2s;"></div>
+    <div class="absolute top-1/2 right-0 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-5 animate-pulse" style="animation-delay: 1s;"></div>
+  </div>
 
-      <div class="space-x-2">
-        <a href="{{ url_for('productos_list') }}" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Mostrar productos</a>
-        <a href="{{ url_for('productos_new') }}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Crear producto</a>
-        <form class="inline-block" method="get" action="{{ url_for('productos_view_form') }}">
-          <input name="id" placeholder="ID para ver/editar/eliminar" class="px-2 py-1 border rounded" />
-          <button type="submit" class="bg-gray-600 text-white px-3 py-1 rounded">Ir</button>
-        </form>
-        <a href="{{ url_for('index') }}" class="ml-4 text-sm text-gray-500 hover:underline">Cerrar sesión (volver)</a>
+  <div class="relative z-10 max-w-6xl mx-auto">
+    <!-- Header Principal -->
+    <div class="float-animation mb-12">
+      <div class="card-glow rounded-2xl p-10">
+        <div class="text-center mb-8">
+          <div class="text-4xl mb-4">⚡</div>
+          <h1 class="glow-text text-4xl md:text-5xl font-light text-white mb-2">ProductsPremium</h1>
+          <p class="text-purple-300 font-light text-lg">Panel de control de productos premium</p>
+        </div>
+
+        <div class="accent-line my-8"></div>
+
+        <!-- Información del Token -->
+        <div class="text-center mb-6">
+          <p class="text-xs text-purple-400 uppercase tracking-widest font-light">Estado de sesión</p>
+          <div class="inline-block mt-3 px-4 py-2 rounded-lg" style="background: rgba(168, 85, 247, 0.2); border: 1px solid rgba(168, 85, 247, 0.4);">
+            <code class="text-sm text-purple-200 font-light">{{ 'Autenticado ✓' if token_present else 'No autenticado' }}</code>
+          </div>
+        </div>
+
+        <div class="accent-line my-8"></div>
+
+        <!-- Grid de Acciones Principales -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <a href="{{ url_for('productos_list') }}" 
+             class="btn-neon btn-primary py-4 px-6 rounded-lg text-white font-light uppercase tracking-wider text-center transition duration-300 hover:shadow-2xl group">
+            <div class="text-2xl mb-2 group-hover:scale-110 transition duration-300">📊</div>
+            <div class="text-sm">Ver Productos</div>
+          </a>
+          
+          <a href="{{ url_for('productos_new') }}" 
+             class="btn-neon btn-secondary py-4 px-6 rounded-lg text-white font-light uppercase tracking-wider text-center transition duration-300 hover:shadow-2xl group">
+            <div class="text-2xl mb-2 group-hover:scale-110 transition duration-300">➕</div>
+            <div class="text-sm">Nuevo Producto</div>
+          </a>
+          
+          <form class="relative" method="get" action="{{ url_for('productos_view_form') }}">
+            <input name="id" placeholder="Buscar por ID" 
+                   class="w-full input-search px-4 py-4 rounded-lg" />
+            <button type="submit" 
+                    class="absolute right-2 top-1/2 transform -translate-y-1/2 text-purple-400 hover:text-purple-300 transition duration-200">
+              🔍
+            </button>
+          </form>
+        </div>
       </div>
     </div>
 
+    <!-- Tarjetas de Estadísticas -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+      <div class="stat-card rounded-xl p-8 text-center">
+        <div class="feature-icon">📦</div>
+        <p class="text-sm text-purple-300 uppercase tracking-widest font-light mb-2">Total de Productos</p>
+        <p class="text-3xl font-light text-white" id="total-productos">0</p>
+        <p class="text-xs text-purple-400 mt-3 font-light">En el catálogo</p>
+      </div>
+
+      <div class="stat-card rounded-xl p-8 text-center">
+        <div class="feature-icon">💰</div>
+        <p class="text-sm text-purple-300 uppercase tracking-widest font-light mb-2">Valor Total</p>
+        <p class="text-3xl font-light text-pink-400" id="valor-total">$0.00</p>
+        <p class="text-xs text-purple-400 mt-3 font-light">Inventario valorizado</p>
+      </div>
+
+      <div class="stat-card rounded-xl p-8 text-center">
+        <div class="feature-icon">✨</div>
+        <p class="text-sm text-purple-300 uppercase tracking-widest font-light mb-2">Estado</p>
+        <p class="text-3xl font-light text-green-400">ACTIVO</p>
+        <p class="text-xs text-purple-400 mt-3 font-light">Sistema operativo</p>
+      </div>
+    </div>
+
+    <!-- Sección de Características -->
+    <div class="card-glow rounded-2xl p-10 mb-12">
+      <h2 class="text-2xl font-light text-white mb-2">Características del Sistema</h2>
+      <p class="text-sm text-purple-300 font-light mb-8">Herramientas poderosas para la gestión integral de tu catálogo</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="p-6 rounded-lg" style="background: rgba(168, 85, 247, 0.05); border: 1px solid rgba(168, 85, 247, 0.2);">
+          <div class="text-2xl mb-3">🔐</div>
+          <h3 class="text-lg font-light text-white mb-2">Autenticación Segura</h3>
+          <p class="text-sm text-purple-300 font-light">Acceso protegido con token JWT</p>
+        </div>
+
+        <div class="p-6 rounded-lg" style="background: rgba(236, 72, 153, 0.05); border: 1px solid rgba(236, 72, 153, 0.2);">
+          <div class="text-2xl mb-3">⚙️</div>
+          <h3 class="text-lg font-light text-white mb-2">Gestión Avanzada</h3>
+          <p class="text-sm text-purple-300 font-light">CRUD completo de productos</p>
+        </div>
+
+        <div class="p-6 rounded-lg" style="background: rgba(168, 85, 247, 0.05); border: 1px solid rgba(168, 85, 247, 0.2);">
+          <div class="text-2xl mb-3">📊</div>
+          <h3 class="text-lg font-light text-white mb-2">Visualización de Datos</h3>
+          <p class="text-sm text-purple-300 font-light">Interfaz moderna y receptiva</p>
+        </div>
+
+        <div class="p-6 rounded-lg" style="background: rgba(236, 72, 153, 0.05); border: 1px solid rgba(236, 72, 153, 0.2);">
+          <div class="text-2xl mb-3">🚀</div>
+          <h3 class="text-lg font-light text-white mb-2">Rendimiento</h3>
+          <p class="text-sm text-purple-300 font-light">Optimización y velocidad premium</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mensaje -->
     {% if message %}
-    <div class="bg-white shadow rounded-lg p-4 mb-4">
-      <p class="text-sm text-gray-700">{{ message }}</p>
+    <div class="card-glow rounded-2xl p-6 mb-8">
+      <p class="text-sm text-purple-300 font-light">ℹ️ {{ message }}</p>
     </div>
     {% endif %}
 
+    <!-- Footer de Sesión -->
+    <div class="text-center pb-8">
+      <a href="{{ url_for('index') }}" 
+         class="text-purple-400 hover:text-purple-300 transition duration-200 text-sm font-light">
+        🚪 Cerrar sesión
+      </a>
+    </div>
   </div>
+
+  <script>
+    // Cargar y calcular estadísticas de productos
+    async function cargarEstadisticas() {
+      try {
+        const response = await fetch('{{ url_for("productos_list") }}');
+        if (!response.ok) {
+          console.error('Error al cargar productos:', response.status);
+          return;
+        }
+
+        // Extraer HTML de la respuesta
+        const html = await response.text();
+        
+        // Crear un parser para extraer datos de la tabla
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        // Buscar todas las filas de la tabla (td con clase table-cell)
+        const rows = doc.querySelectorAll('.table-row');
+        
+        let totalProductos = 0;
+        let valorTotal = 0;
+        
+        rows.forEach(row => {
+          const cells = row.querySelectorAll('.table-cell');
+          if (cells.length >= 4) {
+            // Índice 2 es precio, índice 3 es stock
+            const precio = parseFloat(cells[2].textContent.trim()) || 0;
+            const stock = parseInt(cells[3].textContent.trim()) || 0;
+            
+            totalProductos++;
+            valorTotal += precio * stock;
+          }
+        });
+        
+        // Actualizar los elementos de estadísticas
+        document.getElementById('total-productos').textContent = totalProductos;
+        document.getElementById('valor-total').textContent = '$' + valorTotal.toFixed(2);
+      } catch (error) {
+        console.error('Error al cargar estadísticas:', error);
+      }
+    }
+    
+    // Cargar estadísticas al cargar la página
+    document.addEventListener('DOMContentLoaded', cargarEstadisticas);
+  </script>
 </body>
 </html>

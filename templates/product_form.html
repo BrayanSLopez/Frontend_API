@@ -1,24 +1,198 @@
 <!doctype html>
 <html lang="es">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<script src="https://cdn.tailwindcss.com"></script>
-<title>{{ title }}</title>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes glow {
+      0%, 100% { text-shadow: 0 0 10px rgba(168, 85, 247, 0.5), 0 0 20px rgba(236, 72, 153, 0.3); }
+      50% { text-shadow: 0 0 20px rgba(168, 85, 247, 0.8), 0 0 40px rgba(236, 72, 153, 0.6); }
+    }
+    body {
+      background: radial-gradient(circle at 20% 50%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
+                  linear-gradient(135deg, #0f0a1a 0%, #1a0f2e 100%);
+      min-height: 100vh;
+    }
+    .card-glow {
+      background: rgba(15, 15, 35, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37),
+                  inset 0 0 30px rgba(168, 85, 247, 0.1),
+                  0 0 40px rgba(168, 85, 247, 0.15);
+      animation: slideDown 0.6s ease-out;
+    }
+    .input-glow {
+      background: rgba(30, 20, 60, 0.5);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      transition: all 0.3s ease;
+      color: white;
+    }
+    .input-glow::placeholder {
+      color: rgba(168, 85, 247, 0.4);
+    }
+    .input-glow:focus {
+      background: rgba(40, 25, 80, 0.7);
+      border: 1px solid rgba(168, 85, 247, 0.6);
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.4),
+                  inset 0 0 15px rgba(168, 85, 247, 0.1);
+      outline: none;
+    }
+    .input-glow option {
+      background: #1a0f2e;
+      color: white;
+    }
+    .btn-neon {
+      background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      transition: all 0.3s ease;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+    .btn-neon:hover {
+      box-shadow: 0 0 30px rgba(168, 85, 247, 0.8),
+                  0 0 60px rgba(236, 72, 153, 0.6);
+      transform: translateY(-2px);
+    }
+    .btn-secondary {
+      color: rgba(168, 85, 247, 0.8);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      transition: all 0.3s ease;
+    }
+    .btn-secondary:hover {
+      background: rgba(168, 85, 247, 0.1);
+      border-color: rgba(168, 85, 247, 0.6);
+      color: rgba(168, 85, 247, 1);
+    }
+    .label-text {
+      color: rgba(168, 85, 247, 0.9);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 300;
+    }
+    .glow-text {
+      animation: glow 3s ease-in-out infinite;
+    }
+    .accent-line {
+      background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.5), transparent);
+      height: 1px;
+    }
+    .field-group {
+      position: relative;
+    }
+  </style>
+  <title>{{ title }} - ProductsPremium</title>
 </head>
-<body class="bg-gray-50 min-h-screen p-6">
-  <div class="max-w-2xl mx-auto">
-    <div class="bg-white shadow rounded-lg p-6">
-      <h1 class="text-xl font-semibold mb-4">{{ title }}</h1>
-      <form method="post" action="{{ action }}">
-        <div class="mb-2"><label class="block text-sm">Nombre</label><input name="nombre_producto" class="w-full border px-2 py-1" value="{{ producto.get('nombre_producto','') }}"></div>
-        <div class="mb-2"><label class="block text-sm">Precio</label><input name="precio" class="w-full border px-2 py-1" value="{{ producto.get('precio','') }}"></div>
-        <div class="mb-2"><label class="block text-sm">Stock</label><input name="stock" class="w-full border px-2 py-1" value="{{ producto.get('stock','') }}"></div>
-        <div class="mb-2"><label class="block text-sm">id_categoria</label><input name="id_categoria" class="w-full border px-2 py-1" value="{{ producto.get('id_categoria','') }}"></div>
-        <div class="mb-2"><label class="block text-sm">id_descuento</label><input name="id_descuento" class="w-full border px-2 py-1" value="{{ producto.get('id_descuento','') }}"></div>
-        <div class="mb-2"><label class="block text-sm">id_iva</label><input name="id_iva" class="w-full border px-2 py-1" value="{{ producto.get('id_iva','') }}"></div>
-        <div class="mb-2"><label class="block text-sm">id_proveedor</label><input name="id_proveedor" class="w-full border px-2 py-1" value="{{ producto.get('id_proveedor','') }}"></div>
-        <div class="mt-4">
-          <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded">Enviar</button>
-          <a href="{{ url_for('productos_ui') }}" class="ml-2 text-gray-600">Cancelar</a>
+<body class="p-4 md:p-8">
+  <div class="absolute inset-0 overflow-hidden">
+    <div class="absolute top-0 right-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-5 animate-pulse"></div>
+    <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-5 animate-pulse" style="animation-delay: 2s;"></div>
+  </div>
+
+  <div class="relative z-10 max-w-3xl mx-auto">
+    <div class="card-glow rounded-2xl p-8 md:p-10">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h1 class="glow-text text-3xl font-light text-white">{{ title }}</h1>
+          <p class="text-sm text-purple-300 mt-2 font-light">Gestiona los detalles de tu producto</p>
+        </div>
+        <a href="{{ url_for('productos_ui') }}" class="btn-secondary px-6 py-2 rounded-lg font-light text-sm">
+          ✕ Cancelar
+        </a>
+      </div>
+
+      <div class="accent-line mb-8"></div>
+
+      <form method="post" action="{{ action }}" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="field-group">
+            <label class="label-text mb-3 block">Nombre del Producto</label>
+            <input name="nombre_producto" required
+                   class="w-full px-4 py-3 rounded-lg input-glow"
+                   placeholder="Ej: Laptop Premium"
+                   value="{{ producto.get('nombre_producto','') }}">
+          </div>
+          
+          <div class="field-group">
+            <label class="label-text mb-3 block">Precio</label>
+            <input name="precio" type="number" step="0.01" required
+                   class="w-full px-4 py-3 rounded-lg input-glow"
+                   placeholder="0.00"
+                   value="{{ producto.get('precio','') }}">
+          </div>
+          
+          <div class="field-group">
+            <label class="label-text mb-3 block">Stock</label>
+            <input name="stock" type="number" required
+                   class="w-full px-4 py-3 rounded-lg input-glow"
+                   placeholder="Cantidad"
+                   value="{{ producto.get('stock','') }}">
+          </div>
+          
+          <div class="field-group">
+            <label class="label-text mb-3 block">Categoría</label>
+            <select name="id_categoria" required
+                   class="w-full px-4 py-3 rounded-lg input-glow">
+              <option value="1">1 - Electrónica</option>
+              <option value="2">2 - Ropa</option>
+              <option value="3">3 - Alimentos</option>
+              <option value="4">4 - Libros</option>
+              <option value="5">5 - Hogar</option>
+            </select>
+          </div>
+          
+          <div class="field-group">
+            <label class="label-text mb-3 block">Descuento</label>
+            <select name="id_descuento" required
+                   class="w-full px-4 py-3 rounded-lg input-glow">
+              <option value="1" selected>1 - Sin Descuento</option>
+              <option value="2">2 - 5%</option>
+              <option value="3">3 - 10%</option>
+              <option value="4">4 - 15%</option>
+              <option value="5">5 - 20%</option>
+            </select>
+          </div>
+          
+          <div class="field-group">
+            <label class="label-text mb-3 block">IVA</label>
+            <select name="id_iva" required
+                   class="w-full px-4 py-3 rounded-lg input-glow">
+              <option value="1" selected>1 - 0%</option>
+              <option value="2">2 - 5%</option>
+              <option value="3">3 - 16%</option>
+              <option value="4">4 - 19%</option>
+              <option value="5">5 - 21%</option>
+            </select>
+          </div>
+          
+          <div class="field-group md:col-span-2">
+            <label class="label-text mb-3 block">Proveedor</label>
+            <select name="id_proveedor" required
+                   class="w-full px-4 py-3 rounded-lg input-glow">
+              <option value="1" selected>1 - Proveedor A</option>
+              <option value="2">2 - Proveedor B</option>
+              <option value="3">3 - Proveedor C</option>
+              <option value="4">4 - Proveedor D</option>
+              <option value="5">5 - Proveedor E</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="accent-line my-8"></div>
+
+        <div class="flex gap-4">
+          <button type="submit" class="btn-neon flex-1 py-3 rounded-lg text-white font-light uppercase tracking-wider text-sm">
+            💾 Guardar cambios
+          </button>
+          <a href="{{ url_for('productos_ui') }}" class="btn-secondary flex-1 py-3 rounded-lg font-light uppercase tracking-wider text-sm text-center">
+            Cancelar
+          </a>
         </div>
       </form>
     </div>

@@ -1,24 +1,257 @@
 <!doctype html>
 <html lang="es">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<script src="https://cdn.tailwindcss.com"></script>
-<title>Producto {{ producto_id }}</title>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes toastSlide {
+      0% { opacity: 0; transform: translateX(100%); }
+      10% { opacity: 1; transform: translateX(0); }
+      85% { opacity: 1; transform: translateX(0); }
+      100% { opacity: 0; transform: translateX(100%); }
+    }
+    body {
+      background: radial-gradient(circle at 20% 50%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
+                  linear-gradient(135deg, #0f0a1a 0%, #1a0f2e 100%);
+      min-height: 100vh;
+    }
+    .card-glow {
+      background: rgba(15, 15, 35, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37),
+                  inset 0 0 30px rgba(168, 85, 247, 0.1),
+                  0 0 40px rgba(168, 85, 247, 0.15);
+      animation: slideDown 0.6s ease-out;
+    }
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+    .info-item {
+      background: rgba(30, 20, 60, 0.5);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+    .info-item:hover {
+      border-color: rgba(168, 85, 247, 0.6);
+      background: rgba(40, 25, 80, 0.7);
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
+    }
+    .info-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: rgba(168, 85, 247, 0.7);
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+    }
+    .info-value {
+      font-size: 1.25rem;
+      color: white;
+      font-weight: 300;
+      word-break: break-word;
+    }
+    .btn-neon {
+      background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+      border: 1px solid rgba(168, 85, 247, 0.5);
+      transition: all 0.3s ease;
+      text-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    }
+    .btn-neon:hover {
+      box-shadow: 0 0 30px rgba(168, 85, 247, 0.8),
+                  0 0 60px rgba(236, 72, 153, 0.6);
+      transform: translateY(-2px);
+    }
+    .btn-delete {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      border: 1px solid rgba(239, 68, 68, 0.5);
+      transition: all 0.3s ease;
+    }
+    .btn-delete:hover {
+      box-shadow: 0 0 30px rgba(239, 68, 68, 0.8);
+      transform: translateY(-2px);
+    }
+    .btn-secondary {
+      color: rgba(168, 85, 247, 0.8);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      transition: all 0.3s ease;
+    }
+    .btn-secondary:hover {
+      background: rgba(168, 85, 247, 0.1);
+      border-color: rgba(168, 85, 247, 0.6);
+      color: rgba(168, 85, 247, 1);
+    }
+    .glow-text {
+      animation: glow 3s ease-in-out infinite;
+    }
+    .accent-line {
+      background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.5), transparent);
+      height: 1px;
+    }
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(15, 15, 35, 0.95);
+      padding: 16px 24px;
+      border-radius: 8px;
+      z-index: 1000;
+      animation: toastSlide 5s ease-in-out forwards;
+      box-shadow: 0 0 30px;
+      border: 1px solid;
+      font-weight: 500;
+      min-width: 250px;
+    }
+    .toast.success {
+      border-color: rgba(16, 185, 129, 0.8);
+      color: #10b981;
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+    }
+  </style>
+  <title>Producto - ProductsPremium</title>
 </head>
-<body class="bg-gray-50 min-h-screen p-6">
-  <div class="max-w-2xl mx-auto">
-    <div class="bg-white shadow rounded-lg p-6">
-      <h1 class="text-xl font-semibold mb-4">Producto {{ producto_id }}</h1>
+<body class="p-4 md:p-8">
+  <div class="absolute inset-0 overflow-hidden">
+    <div class="absolute top-0 right-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-5 animate-pulse"></div>
+    <div class="absolute bottom-0 left-1/4 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-5 animate-pulse" style="animation-delay: 2s;"></div>
+  </div>
+
+  <div class="relative z-10 max-w-5xl mx-auto">
+    <div class="card-glow rounded-2xl p-8 md:p-10">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h1 class="glow-text text-3xl font-light text-white">Producto #{{ producto_id }}</h1>
+          <p class="text-sm text-purple-300 mt-2 font-light">Detalles y opciones de gestión</p>
+        </div>
+        <a href="{{ url_for('productos_list') }}" class="btn-secondary px-6 py-2 rounded-lg font-light text-sm">
+          ← Volver
+        </a>
+      </div>
+
+      <div class="accent-line mb-8"></div>
+
       {% if producto %}
-        <pre class="bg-gray-100 p-4 rounded">{{ producto | tojson(indent=2) }}</pre>
-        <a href="{{ url_for('productos_edit', pid=producto_id) }}" class="bg-yellow-500 px-3 py-1 rounded text-white">Editar</a>
-        <form method="post" action="{{ url_for('productos_delete', pid=producto_id) }}" style="display:inline-block;margin-left:8px;">
-          <button type="submit" class="text-red-600">Eliminar</button>
-        </form>
+        <div class="mb-8">
+          <h3 class="text-sm text-purple-300 uppercase tracking-widest font-light mb-6">Información del Producto</h3>
+          
+          <div class="info-grid">
+            {% if producto.get('nombre_producto') %}
+              <div class="info-item">
+                <div class="info-label">📦 Nombre</div>
+                <div class="info-value">{{ producto.get('nombre_producto') }}</div>
+              </div>
+            {% endif %}
+            
+            {% if producto.get('precio') %}
+              <div class="info-item">
+                <div class="info-label">💰 Precio</div>
+                <div class="info-value text-pink-400">{{ "%.2f" | format(producto.get('precio') | float) }}</div>
+              </div>
+            {% endif %}
+            
+            {% if producto.get('stock') %}
+              <div class="info-item">
+                <div class="info-label">📊 Stock</div>
+                <div class="info-value">{{ producto.get('stock') }} unidades</div>
+              </div>
+            {% endif %}
+            
+            {% if producto.get('id_categoria') %}
+              <div class="info-item">
+                <div class="info-label">🏷️ Categoría ID</div>
+                <div class="info-value">#{{ producto.get('id_categoria') }}</div>
+              </div>
+            {% endif %}
+            
+            {% if producto.get('id_descuento') %}
+              <div class="info-item">
+                <div class="info-label">🎁 Descuento ID</div>
+                <div class="info-value">#{{ producto.get('id_descuento') }}</div>
+              </div>
+            {% endif %}
+            
+            {% if producto.get('id_iva') %}
+              <div class="info-item">
+                <div class="info-label">📈 IVA ID</div>
+                <div class="info-value">#{{ producto.get('id_iva') }}</div>
+              </div>
+            {% endif %}
+            
+            {% if producto.get('id_proveedor') %}
+              <div class="info-item">
+                <div class="info-label">🤝 Proveedor ID</div>
+                <div class="info-value">#{{ producto.get('id_proveedor') }}</div>
+              </div>
+            {% endif %}
+            
+            {% if producto.get('id') %}
+              <div class="info-item">
+                <div class="info-label">🆔 ID del Producto</div>
+                <div class="info-value">{{ producto.get('id') }}</div>
+              </div>
+            {% endif %}
+            
+            {% if producto.get('id_producto') %}
+              <div class="info-item">
+                <div class="info-label">🆔 ID Alternativo</div>
+                <div class="info-value">{{ producto.get('id_producto') }}</div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="accent-line my-8"></div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <a href="{{ url_for('productos_edit', pid=producto_id) }}" 
+             class="btn-neon py-3 rounded-lg text-white font-light uppercase tracking-wider text-sm text-center">
+             ✎ Editar Producto
+          </a>
+          <form method="post" action="{{ url_for('productos_delete', pid=producto_id) }}" onsubmit="return confirm('¿Estás seguro de eliminar este producto?');">
+            <button type="submit" class="btn-delete w-full py-3 rounded-lg text-white font-light uppercase tracking-wider text-sm">
+              🗑 Eliminar
+            </button>
+          </form>
+        </div>
       {% else %}
-        <p class="text-sm text-gray-600">Producto no encontrado.</p>
+        <div class="text-center py-16">
+          <div class="text-6xl mb-4">⚠</div>
+          <p class="text-gray-400 font-light text-lg">Producto no encontrado</p>
+          <a href="{{ url_for('productos_list') }}" class="text-purple-400 hover:text-purple-300 transition duration-200 text-sm font-light mt-4 inline-block">
+            Volver a la lista
+          </a>
+        </div>
       {% endif %}
-      <p class="mt-4"><a href="{{ url_for('productos_ui') }}" class="text-gray-600">Volver</a></p>
     </div>
   </div>
+
+  <script>
+    function showToast(message, type) {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      
+      if (type === 'success') {
+        toast.innerHTML = `✓ ${message}`;
+      }
+      
+      document.body.appendChild(toast);
+    }
+    
+    // Verificar si hay mensaje en el template
+    const messageElement = "{{ message }}";
+    if (messageElement && messageElement.trim()) {
+      showToast(messageElement, 'success');
+    }
+  </script>
 </body>
 </html>

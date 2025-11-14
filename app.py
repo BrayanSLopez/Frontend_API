@@ -15,17 +15,92 @@ Instalar: pip install flask requests
 Ejecutar: python app.py
 """
 
-API_BASE = "https://bug-free-journey-r45ww6g56p4725jj5-5000.app.github.dev"
+API_BASE = "https://organic-umbrella-r4pjw6pgw4p257g4-5000.app.github.dev"
 # Endpoints de la nueva API
 LOGIN_ENDPOINT = f"{API_BASE}/login"
 REGISTER_ENDPOINT = f"{API_BASE}/registry"
 PRODUCTS_ENDPOINT = f"{API_BASE}/productos"
+CATEGORIAS_ENDPOINT = f"{API_BASE}/categorias"
+DESCUENTOS_ENDPOINT = f"{API_BASE}/descuentos"
+IMPUESTOS_ENDPOINT = f"{API_BASE}/impuestos"
+PROVEEDORES_ENDPOINT = f"{API_BASE}/proveedores"
 
 # Inicializar app
 app = Flask(__name__, template_folder="templates")
 
 # Variable global simple para guardar el token del usuario logueado (por simplicity)
 TOKEN = None
+
+# Datos por defecto para inicializar
+CATEGORIAS_DEFAULT = [
+  {"nombre_categoria": "Electrónica"},
+  {"nombre_categoria": "Ropa"},
+  {"nombre_categoria": "Alimentos"},
+  {"nombre_categoria": "Libros"},
+  {"nombre_categoria": "Hogar"}
+]
+
+DESCUENTOS_DEFAULT = [
+  {"nombre": "Sin Descuento", "porcentaje": 0.0},
+  {"nombre": "Descuento 5%", "porcentaje": 5.0},
+  {"nombre": "Descuento 10%", "porcentaje": 10.0},
+  {"nombre": "Descuento 15%", "porcentaje": 15.0},
+  {"nombre": "Descuento 20%", "porcentaje": 20.0}
+]
+
+IMPUESTOS_DEFAULT = [
+  {"nombre": "IVA 0%", "porcentaje": 0.0},
+  {"nombre": "IVA 5%", "porcentaje": 5.0},
+  {"nombre": "IVA 16%", "porcentaje": 16.0},
+  {"nombre": "IVA 19%", "porcentaje": 19.0},
+  {"nombre": "IVA 21%", "porcentaje": 21.0}
+]
+
+PROVEEDORES_DEFAULT = [
+  {"nombre": "Proveedor A", "telefono": "123456789", "email": "proveedorA@mail.com", "direccion": "Calle 123"},
+  {"nombre": "Proveedor B", "telefono": "987654321", "email": "proveedorB@mail.com", "direccion": "Calle 456"},
+  {"nombre": "Proveedor C", "telefono": "555666777", "email": "proveedorC@mail.com", "direccion": "Calle 789"},
+  {"nombre": "Proveedor D", "telefono": "111222333", "email": "proveedorD@mail.com", "direccion": "Calle 101"},
+  {"nombre": "Proveedor E", "telefono": "444555666", "email": "proveedorE@mail.com", "direccion": "Calle 202"}
+]
+
+def inicializar_datos():
+  """Inicializa categorías, descuentos, impuestos y proveedores por defecto"""
+  logger.info("Inicializando datos por defecto...")
+  
+  # Crear categorías
+  for cat in CATEGORIAS_DEFAULT:
+    try:
+      requests.post(CATEGORIAS_ENDPOINT, json=cat, timeout=5)
+      logger.debug(f"Categoría '{cat['nombre_categoria']}' creada")
+    except Exception as e:
+      logger.debug(f"Error al crear categoría: {e}")
+  
+  # Crear descuentos
+  for desc in DESCUENTOS_DEFAULT:
+    try:
+      requests.post(DESCUENTOS_ENDPOINT, json=desc, timeout=5)
+      logger.debug(f"Descuento '{desc['nombre']}' creado")
+    except Exception as e:
+      logger.debug(f"Error al crear descuento: {e}")
+  
+  # Crear impuestos
+  for imp in IMPUESTOS_DEFAULT:
+    try:
+      requests.post(IMPUESTOS_ENDPOINT, json=imp, timeout=5)
+      logger.debug(f"Impuesto '{imp['nombre']}' creado")
+    except Exception as e:
+      logger.debug(f"Error al crear impuesto: {e}")
+  
+  # Crear proveedores
+  for prov in PROVEEDORES_DEFAULT:
+    try:
+      requests.post(PROVEEDORES_ENDPOINT, json=prov, timeout=5)
+      logger.debug(f"Proveedor '{prov['nombre']}' creado")
+    except Exception as e:
+      logger.debug(f"Error al crear proveedor: {e}")
+  
+  logger.info("Datos por defecto inicializados")
 
 # Lista corta de memes públicos (URLs directas) - usados para errores leves
 MEMES = [
@@ -94,6 +169,12 @@ def do_login():
     msg = f"Autenticación fallida ({resp.status_code}). {detail}"
     return render_template('login.html', message=msg), max(400, resp.status_code)
 
+@app.route('/register-success', methods=['GET'])
+def register_success():
+  username = request.args.get('username', '')
+  message = f"✓ Usuario '{username}' registrado exitosamente. Puedes iniciar sesión ahora."
+  return render_template('login.html', message=message), 200
+
 @app.route('/register', methods=['GET'])
 def register():
   return render_template('register.html', message=None)
@@ -121,9 +202,9 @@ def do_register():
       server_msg = body.get('message') or body.get('detail') or str(body)
     except Exception:
       server_msg = resp.text or 'Registro exitoso.'
-    message = f"Registro satisfactorio. {server_msg}"
-    # llevar al login con mensaje
-    return render_template('login.html', message=message), 200
+    # Redirigir con parámetros para mostrar toast
+    username = data.get('username', '')
+    return redirect(url_for('register_success', username=username))
   else:
     try:
       body = resp.json()
@@ -153,7 +234,24 @@ def productos_list():
   except Exception:
     logger.exception('Error al obtener productos')
     productos = []
-  return render_template('products_list.html', productos=productos)
+  return render_template('products_list.html', productos=productos, message=None)
+
+# Mostrar lista de productos con mensaje
+@app.route('/productos-list-msg', methods=['GET'])
+def productos_list_message():
+  global TOKEN
+  if not TOKEN:
+    return redirect(url_for('index'))
+  msg = request.args.get('msg', '')
+  headers = {"Authorization": f"Bearer {TOKEN}"}
+  try:
+    resp = requests.get(PRODUCTS_ENDPOINT, headers=headers, timeout=8)
+    logger.debug('GET productos status=%s', resp.status_code)
+    productos = resp.json() if resp.ok else []
+  except Exception:
+    logger.exception('Error al obtener productos')
+    productos = []
+  return render_template('products_list.html', productos=productos, message=msg)
 
 @app.route('/productos/new', methods=['GET'])
 def productos_new():
@@ -181,12 +279,13 @@ def productos_create():
     resp = requests.post(PRODUCTS_ENDPOINT, json=data, headers=headers, timeout=8)
     logger.debug('POST productos status=%s body=%s', resp.status_code, resp.text)
     if resp.ok:
-      return redirect(url_for('productos_list'))
+      message = f"✓ Producto '{data['nombre_producto']}' creado exitosamente."
+      return redirect(url_for('productos_list_message', msg=message))
     else:
-      return render_template('products_ui.html', token_present="sí", message=f"Error creando producto: {resp.status_code} {resp.text}"), max(400, resp.status_code)
+      return render_template('products_ui.html', token_present="sí", message=f"❌ Error creando producto: {resp.status_code} {resp.text}"), max(400, resp.status_code)
   except Exception:
     logger.exception('Error al crear producto')
-    return render_template('products_ui.html', token_present="sí", message="Error de red al crear producto"), 502
+    return render_template('products_ui.html', token_present="sí", message="❌ Error de red al crear producto"), 502
 
 @app.route('/productos/<int:pid>', methods=['GET'])
 def productos_view(pid):
@@ -200,7 +299,23 @@ def productos_view(pid):
   except Exception:
     logger.exception('Error al obtener producto')
     producto = None
-  return render_template('product_view.html', producto=producto, producto_id=pid)
+  return render_template('product_view.html', producto=producto, producto_id=pid, message=None)
+
+# Ver producto con mensaje
+@app.route('/productos/<int:pid>/msg', methods=['GET'])
+def productos_view_message(pid):
+  global TOKEN
+  if not TOKEN:
+    return redirect(url_for('index'))
+  msg = request.args.get('msg', '')
+  headers = {"Authorization": f"Bearer {TOKEN}"}
+  try:
+    resp = requests.get(f"{PRODUCTS_ENDPOINT}/{pid}", headers=headers, timeout=8)
+    producto = resp.json() if resp.ok else None
+  except Exception:
+    logger.exception('Error al obtener producto')
+    producto = None
+  return render_template('product_view.html', producto=producto, producto_id=pid, message=msg)
 
 # Form de edición
 @app.route('/productos/<int:pid>/edit', methods=['GET'])
@@ -236,12 +351,13 @@ def productos_update(pid):
     resp = requests.put(f"{PRODUCTS_ENDPOINT}/{pid}", json=data, headers=headers, timeout=8)
     logger.debug('PUT productos/%s status=%s body=%s', pid, resp.status_code, resp.text)
     if resp.ok:
-      return redirect(url_for('productos_view', pid=pid))
+      message = f"✓ Producto '{data['nombre_producto']}' actualizado exitosamente."
+      return redirect(url_for('productos_view_message', pid=pid, msg=message))
     else:
-      return render_template('products_ui.html', token_present="sí", message=f"Error actualizando producto: {resp.status_code} {resp.text}"), max(400, resp.status_code)
+      return render_template('products_ui.html', token_present="sí", message=f"❌ Error actualizando producto: {resp.status_code} {resp.text}"), max(400, resp.status_code)
   except Exception:
     logger.exception('Error al actualizar producto')
-    return render_template('products_ui.html', token_present="sí", message="Error de red al actualizar producto"), 502
+    return render_template('products_ui.html', token_present="sí", message="❌ Error de red al actualizar producto"), 502
 
 @app.route('/productos/<int:pid>/delete', methods=['POST'])
 def productos_delete(pid):
@@ -252,10 +368,14 @@ def productos_delete(pid):
   try:
     resp = requests.delete(f"{PRODUCTS_ENDPOINT}/{pid}", headers=headers, timeout=8)
     logger.debug('DELETE productos/%s status=%s', pid, resp.status_code)
-    return redirect(url_for('productos_list'))
+    if resp.ok:
+      message = f"✓ Producto #{pid} eliminado exitosamente."
+      return redirect(url_for('productos_list_message', msg=message))
+    else:
+      return render_template('products_ui.html', token_present="sí", message=f"❌ Error eliminando producto: {resp.status_code}"), max(400, resp.status_code)
   except Exception:
     logger.exception('Error al eliminar producto')
-    return render_template('products_ui.html', token_present="sí", message="Error de red al eliminar producto"), 502
+    return render_template('products_ui.html', token_present="sí", message="❌ Error de red al eliminar producto"), 502
 
 # Ruta auxiliar para mostrar formulario rápido de consultar por id
 @app.route('/productos/view', methods=['GET'])
@@ -270,4 +390,5 @@ def productos_view_form():
   return redirect(url_for('productos_view', pid=pid_int))
 
 if __name__ == "__main__":
+  inicializar_datos()
   app.run(host="0.0.0.0", port=5000, debug=True)
