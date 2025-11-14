@@ -64,6 +64,61 @@ PROVEEDORES_DEFAULT = [
   {"nombre": "Proveedor E", "telefono": "444555666", "email": "proveedorE@mail.com", "direccion": "Calle 202"}
 ]
 
+def obtener_datos_completos_producto(producto):
+  """Enriquece los datos del producto con información de relaciones (categoría, descuento, IVA, proveedor)"""
+  if not producto or not isinstance(producto, dict):
+    return producto
+  
+  headers = {"Authorization": f"Bearer {TOKEN}"} if TOKEN else {}
+  
+  # Obtener nombre de categoría
+  if producto.get('id_categoria'):
+    try:
+      resp = requests.get(f"{CATEGORIAS_ENDPOINT}/{producto['id_categoria']}", headers=headers, timeout=5)
+      if resp.ok:
+        cat_data = resp.json()
+        producto['nombre_categoria'] = cat_data.get('nombre_categoria', 'Desconocida')
+    except Exception:
+      producto['nombre_categoria'] = 'Error al cargar'
+  
+  # Obtener nombre de descuento
+  if producto.get('id_descuento'):
+    try:
+      resp = requests.get(f"{DESCUENTOS_ENDPOINT}/{producto['id_descuento']}", headers=headers, timeout=5)
+      if resp.ok:
+        desc_data = resp.json()
+        producto['nombre_descuento'] = desc_data.get('nombre', 'Desconocido')
+        producto['porcentaje_descuento'] = desc_data.get('porcentaje', 0)
+    except Exception:
+      producto['nombre_descuento'] = 'Error al cargar'
+  
+  # Obtener nombre de IVA
+  if producto.get('id_iva'):
+    try:
+      resp = requests.get(f"{IMPUESTOS_ENDPOINT}/{producto['id_iva']}", headers=headers, timeout=5)
+      if resp.ok:
+        iva_data = resp.json()
+        producto['nombre_iva'] = iva_data.get('nombre', 'Desconocido')
+        producto['porcentaje_iva'] = iva_data.get('porcentaje', 0)
+    except Exception:
+      producto['nombre_iva'] = 'Error al cargar'
+  
+  # Obtener datos del proveedor
+  if producto.get('id_proveedor'):
+    try:
+      resp = requests.get(f"{PROVEEDORES_ENDPOINT}/{producto['id_proveedor']}", headers=headers, timeout=5)
+      if resp.ok:
+        prov_data = resp.json()
+        producto['nombre_proveedor'] = prov_data.get('nombre', 'Desconocido')
+        producto['email_proveedor'] = prov_data.get('email', '')
+        producto['telefono_proveedor'] = prov_data.get('telefono', '')
+        producto['direccion_proveedor'] = prov_data.get('direccion', '')
+    except Exception:
+      producto['nombre_proveedor'] = 'Error al cargar'
+  
+  return producto
+
+
 def inicializar_datos():
   """Inicializa categorías, descuentos, impuestos y proveedores por defecto"""
   logger.info("Inicializando datos por defecto...")
@@ -296,10 +351,15 @@ def productos_view(pid):
   try:
     resp = requests.get(f"{PRODUCTS_ENDPOINT}/{pid}", headers=headers, timeout=8)
     producto = resp.json() if resp.ok else None
+    if producto:
+      producto = obtener_datos_completos_producto(producto)
   except Exception:
     logger.exception('Error al obtener producto')
     producto = None
-  return render_template('product_view.html', producto=producto, producto_id=pid, message=None)
+  
+  # Obtener nombre del producto para el título
+  nombre_producto = producto.get('nombre_producto', f'Producto #{pid}') if producto else f'Producto #{pid}'
+  return render_template('product_view.html', producto=producto, producto_id=pid, nombre_producto=nombre_producto, message=None)
 
 # Ver producto con mensaje
 @app.route('/productos/<int:pid>/msg', methods=['GET'])
@@ -312,10 +372,15 @@ def productos_view_message(pid):
   try:
     resp = requests.get(f"{PRODUCTS_ENDPOINT}/{pid}", headers=headers, timeout=8)
     producto = resp.json() if resp.ok else None
+    if producto:
+      producto = obtener_datos_completos_producto(producto)
   except Exception:
     logger.exception('Error al obtener producto')
     producto = None
-  return render_template('product_view.html', producto=producto, producto_id=pid, message=msg)
+  
+  # Obtener nombre del producto para el título
+  nombre_producto = producto.get('nombre_producto', f'Producto #{pid}') if producto else f'Producto #{pid}'
+  return render_template('product_view.html', producto=producto, producto_id=pid, nombre_producto=nombre_producto, message=msg)
 
 # Form de edición
 @app.route('/productos/<int:pid>/edit', methods=['GET'])
@@ -330,7 +395,9 @@ def productos_edit(pid):
   except Exception:
     logger.exception('Error al obtener producto para editar')
     producto = {}
-  return render_template('product_form.html', title=f"Editar producto {pid}", action=url_for('productos_update', pid=pid), producto=producto)
+  nombre_producto = producto.get('nombre_producto', f'Producto #{pid}')
+  titulo = f"Editar {nombre_producto}"
+  return render_template('product_form.html', title=titulo, action=url_for('productos_update', pid=pid), producto=producto)
 
 @app.route('/productos/<int:pid>/edit', methods=['POST'])
 def productos_update(pid):
@@ -366,10 +433,26 @@ def productos_delete(pid):
     return redirect(url_for('index'))
   headers = {"Authorization": f"Bearer {TOKEN}"}
   try:
+    # Intentar obtener el nombre del producto desde el formulario (si viene desde la lista)
+    nombre_enviado = request.form.get('nombre_producto') if request.form else None
+    nombre_producto = None
+
+    # Si no llegó el nombre, intentar obtenerlo antes de borrar
+    if not nombre_enviado:
+      try:
+        r_get = requests.get(f"{PRODUCTS_ENDPOINT}/{pid}", headers=headers, timeout=5)
+        if r_get.ok:
+          nombre_producto = (r_get.json() or {}).get('nombre_producto')
+      except Exception:
+        logger.debug('No se pudo obtener nombre antes de eliminar')
+    else:
+      nombre_producto = nombre_enviado
+
     resp = requests.delete(f"{PRODUCTS_ENDPOINT}/{pid}", headers=headers, timeout=8)
     logger.debug('DELETE productos/%s status=%s', pid, resp.status_code)
     if resp.ok:
-      message = f"✓ Producto #{pid} eliminado exitosamente."
+      display_name = nombre_producto or f"#{pid}"
+      message = f"✓ Producto '{display_name}' eliminado exitosamente."
       return redirect(url_for('productos_list_message', msg=message))
     else:
       return render_template('products_ui.html', token_present="sí", message=f"❌ Error eliminando producto: {resp.status_code}"), max(400, resp.status_code)

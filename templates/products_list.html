@@ -183,6 +183,7 @@
                      class="action-link">👁 Ver</a>
                   <form method="post" action="{{ url_for('productos_delete', pid=(p.get('id') or p.get('id_producto'))) }}" 
                         class="inline" onsubmit="return confirm('¿Eliminar este producto?');">
+                    <input type="hidden" name="nombre_producto" value="{{ p.get('nombre_producto') or p.get('nombre') or '' }}" />
                     <button type="submit" class="delete-btn cursor-pointer transition duration-200">
                       🗑 Eliminar
                     </button>

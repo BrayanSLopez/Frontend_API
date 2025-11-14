@@ -130,7 +130,7 @@
     <div class="card-glow rounded-2xl p-8 md:p-10">
       <div class="flex items-center justify-between mb-8">
         <div>
-          <h1 class="glow-text text-3xl font-light text-white">Producto #{{ producto_id }}</h1>
+          <h1 class="glow-text text-3xl font-light text-white">{{ nombre_producto or ('Producto #' ~ producto_id) }}</h1>
           <p class="text-sm text-purple-300 mt-2 font-light">Detalles y opciones de gestión</p>
         </div>
         <a href="{{ url_for('productos_list') }}" class="btn-secondary px-6 py-2 rounded-lg font-light text-sm">
@@ -166,28 +166,66 @@
               </div>
             {% endif %}
             
-            {% if producto.get('id_categoria') %}
+            {% if producto.get('nombre_categoria') %}
+              <div class="info-item">
+                <div class="info-label">🏷️ Categoría</div>
+                <div class="info-value">{{ producto.get('nombre_categoria') }}</div>
+              </div>
+            {% elif producto.get('id_categoria') %}
               <div class="info-item">
                 <div class="info-label">🏷️ Categoría ID</div>
                 <div class="info-value">#{{ producto.get('id_categoria') }}</div>
               </div>
             {% endif %}
             
-            {% if producto.get('id_descuento') %}
+            {% if producto.get('nombre_descuento') %}
+              <div class="info-item">
+                <div class="info-label">🎁 Descuento</div>
+                <div class="info-value">{{ producto.get('nombre_descuento') }} ({{ producto.get('porcentaje_descuento', 0) }}%)</div>
+              </div>
+            {% elif producto.get('id_descuento') %}
               <div class="info-item">
                 <div class="info-label">🎁 Descuento ID</div>
                 <div class="info-value">#{{ producto.get('id_descuento') }}</div>
               </div>
             {% endif %}
             
-            {% if producto.get('id_iva') %}
+            {% if producto.get('nombre_iva') %}
+              <div class="info-item">
+                <div class="info-label">📈 IVA</div>
+                <div class="info-value">{{ producto.get('nombre_iva') }} ({{ producto.get('porcentaje_iva', 0) }}%)</div>
+              </div>
+            {% elif producto.get('id_iva') %}
               <div class="info-item">
                 <div class="info-label">📈 IVA ID</div>
                 <div class="info-value">#{{ producto.get('id_iva') }}</div>
               </div>
             {% endif %}
             
-            {% if producto.get('id_proveedor') %}
+            {% if producto.get('nombre_proveedor') %}
+              <div class="info-item">
+                <div class="info-label">🤝 Proveedor</div>
+                <div class="info-value">{{ producto.get('nombre_proveedor') }}</div>
+              </div>
+              {% if producto.get('email_proveedor') %}
+                <div class="info-item">
+                  <div class="info-label">📧 Email Proveedor</div>
+                  <div class="info-value text-purple-300">{{ producto.get('email_proveedor') }}</div>
+                </div>
+              {% endif %}
+              {% if producto.get('telefono_proveedor') %}
+                <div class="info-item">
+                  <div class="info-label">📞 Teléfono</div>
+                  <div class="info-value">{{ producto.get('telefono_proveedor') }}</div>
+                </div>
+              {% endif %}
+              {% if producto.get('direccion_proveedor') %}
+                <div class="info-item">
+                  <div class="info-label">📍 Dirección</div>
+                  <div class="info-value">{{ producto.get('direccion_proveedor') }}</div>
+                </div>
+              {% endif %}
+            {% elif producto.get('id_proveedor') %}
               <div class="info-item">
                 <div class="info-label">🤝 Proveedor ID</div>
                 <div class="info-value">#{{ producto.get('id_proveedor') }}</div>
@@ -218,6 +256,7 @@
              ✎ Editar Producto
           </a>
           <form method="post" action="{{ url_for('productos_delete', pid=producto_id) }}" onsubmit="return confirm('¿Estás seguro de eliminar este producto?');">
+            <input type="hidden" name="nombre_producto" value="{{ producto.get('nombre_producto') or '' }}" />
             <button type="submit" class="btn-delete w-full py-3 rounded-lg text-white font-light uppercase tracking-wider text-sm">
               🗑 Eliminar
             </button>
